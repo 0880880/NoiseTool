@@ -29,7 +29,7 @@ configure(subprojects) {
 }
 
 subprojects {
-	version = '0.3.1'
+	version = '0.4.0'
 	ext.appName = 'NoiseTool'
 	repositories {
 		mavenCentral()
@@ -42,4 +42,4 @@ subprojects {
 	}
 }
 
-eclipse.project.name = 'MapGenerator' + '-parent'
+eclipse.project.name = 'NoiseTool' + '-parent'
