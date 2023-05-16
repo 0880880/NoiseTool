@@ -16,10 +16,8 @@ import com.badlogic.gdx.utils.XmlReader;
 import com.badlogic.gdx.utils.XmlWriter;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import imgui.ImGui;
-import imgui.ImVec2;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import imgui.internal.ImGuiWindow;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import lombok.AllArgsConstructor;
@@ -37,8 +35,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.time.LocalTime;
-import java.util.Iterator;
 
 public class NoiseScreen implements Screen {
 
@@ -186,9 +182,7 @@ public class NoiseScreen implements Screen {
             XmlReader.Element main = xml.parse(Gdx.files.absolute(pointer.getStringUTF8()));
             seed.set(Integer.parseInt(main.getAttribute("seed")));
             resolution[0] = Integer.parseInt(main.getAttribute("resolution"));
-            Iterator<XmlReader.Element> layerIterator = main.getChildrenByName("layer").iterator();
-            while (layerIterator.hasNext()) {
-                XmlReader.Element layer = layerIterator.next();
+            for (XmlReader.Element layer : main.getChildrenByName("layer")) {
                 NoiseLayer nl = new NoiseLayer();
                 nl.noiseType = NoiseType.valueOf(layer.getAttribute("type"));
                 nl.amplitude.set(Float.parseFloat(layer.getAttribute("amplitude")));
