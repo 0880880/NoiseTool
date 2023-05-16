@@ -13,5 +13,8 @@ public enum NoiseType {
     Cellular,
     Value,
     ValueFractal,
+    Simplex,
+    SimplexFractal,
+    WhiteNoise,
 
 }

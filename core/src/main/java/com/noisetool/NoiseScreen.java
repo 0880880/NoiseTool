@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.XmlReader;
 import com.badlogic.gdx.utils.XmlWriter;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import imgui.ImGui;
+import imgui.extension.texteditor.TextEditor;
+import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImBoolean;
@@ -25,6 +27,7 @@ import make.some.noise.Noise;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.nfd.NativeFileDialog;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
@@ -60,6 +63,7 @@ public class NoiseScreen implements Screen {
     ImBoolean autoGenerate = new ImBoolean();
 
     void generate() {
+
         long start = System.currentTimeMillis();
         generator.setSeed(seed.get());
         map = new Color[resolution[0]][resolution[0]];
@@ -102,6 +106,14 @@ public class NoiseScreen implements Screen {
                         generator.setFractalGain(layer.fractalGain.get());
                         generator.setFractalOctaves(layer.fractalOctaves.get());
                         val = generator.getValueFractal(i, j) * layer.amplitude.get();
+                    } else if (layer.noiseType == NoiseType.Simplex) {
+                        val = generator.getSimplex(i, j) * layer.amplitude.get();
+                    } else if (layer.noiseType == NoiseType.SimplexFractal) {
+                        generator.setFractalGain(layer.fractalGain.get());
+                        generator.setFractalOctaves(layer.fractalOctaves.get());
+                        val = generator.getSimplexFractal(i, j) * layer.amplitude.get();
+                    } else if (layer.noiseType == NoiseType.WhiteNoise) {
+                        val = generator.getWhiteNoise(i, j) * layer.amplitude.get();
                     }
 
                     map[i][j].add(val, val, val, 0);
@@ -110,8 +122,74 @@ public class NoiseScreen implements Screen {
         }
         long end = System.currentTimeMillis();
         generationSpeed = end - start;
-        System.out.println("Took " + generationSpeed + "ms to generate");
+
+        StringBuilder code = new StringBuilder();
+
+        code.append("int seed = " + seed.get() + ";\n");
+        code.append("int size = " + resolution[0] + ";\n\n");
+
+        int idx = 0;
+        for (NoiseLayer layer : noiseLayers) {
+            String name = "noise" + idx;
+            code.append("Noise " + name + " = new Noise();\n");
+            code.append(name + ".setSeed(seed);\n");
+            code.append(name + ".setFrequency(" + layer.frequency.get() + "f);\n");
+            if (isFractal(layer)) {
+                code.append(name + ".setFractalGain(" + layer.fractalGain.get() + "f);\n");
+                code.append(name + ".setFractalOctaves(" + layer.fractalOctaves.get() + ");\n");
+            }
+            code.append("\n");
+            idx++;
+        }
+
+        code.append("for (i = 0; i < size; i++) {\n");
+        code.append("   for (j = 0; j < size; j++) {\n");
+        code.append("       ");
+        code.append("float height = ");
+        idx = 0;
+        for (NoiseLayer layer : noiseLayers) {
+            String name = "noise" + idx;
+            if (layer.noiseType == NoiseType.Perlin) {
+                code.append(name + ".getPerlin(i, j)");
+            } else if (layer.noiseType == NoiseType.PerlinFractal) {
+                code.append(name + ".getPerlinFractal(i, j)");
+            } else if (layer.noiseType == NoiseType.Cubic) {
+                code.append(name + ".getCubic(i, j)");
+            } else if (layer.noiseType == NoiseType.CubicFractal) {
+                code.append(name + ".getCubicFractal(i, j)");
+            } else if (layer.noiseType == NoiseType.Foam) {
+                code.append(name + ".getFoam(i, j)");
+            } else if (layer.noiseType == NoiseType.FoamFractal) {
+                code.append(name + ".getFoamFractal(i, j)");
+            } else if (layer.noiseType == NoiseType.Honey) {
+                code.append(name + ".getHoney(i, j)");
+            } else if (layer.noiseType == NoiseType.HoneyFractal) {
+                code.append(name + ".getHoneyFractal(i, j)");
+            } else if (layer.noiseType == NoiseType.Cellular) {
+                code.append(name + ".getCellular(i, j)");
+            } else if (layer.noiseType == NoiseType.Value) {
+                code.append(name + ".getValue(i, j)");
+            } else if (layer.noiseType == NoiseType.ValueFractal) {
+                code.append(name + ".getValueFractal(i, j)");
+            } else if (layer.noiseType == NoiseType.Simplex) {
+                code.append(name + ".getSimplex(i, j)");
+            } else if (layer.noiseType == NoiseType.SimplexFractal) {
+                code.append(name + ".getSimplexFractal(i, j)");
+            } else if (layer.noiseType == NoiseType.WhiteNoise) {
+                code.append(name + ".getWhiteNoise(i, j)");
+            }
+            if (idx < noiseLayers.size - 1) code.append(" + ");
+            idx++;
+        }
+        code.append(";\n");
+        code.append("   }\n");
+        code.append("}\n");
+
+        textEditor.setText(code.toString());
+
     }
+
+    TextEditor textEditor;
 
     @Override
     public void show() {
@@ -122,6 +200,12 @@ public class NoiseScreen implements Screen {
 
         imGuiGlfw.init(handle, true);
         imGuiGl3.init("#version 330");
+
+        textEditor = new TextEditor();
+        textEditor.setReadOnly(true);
+        textEditor.setTabSize(4);
+        textEditor.setShowWhitespaces(false);
+        textEditor.setLanguageDefinition(TextEditorLanguageDefinition.cPlusPlus());
 
         batch = new SpriteBatch();
 
@@ -145,8 +229,10 @@ public class NoiseScreen implements Screen {
     void save() {
         PointerBuffer pointer = BufferUtils.createPointerBuffer(1);
         NativeFileDialog.NFD_SaveDialog("nt", System.getProperty("user.home"), pointer);
-        if (pointer.get() != 0) {
-            String location = pointer.getStringUTF8();
+        long addr = pointer.get();
+
+        if (addr != 0) {
+            String location = MemoryUtil.memUTF8(addr);
             generate();
             StringWriter writer = new StringWriter();
             try {
@@ -175,11 +261,12 @@ public class NoiseScreen implements Screen {
 
         PointerBuffer pointer = BufferUtils.createPointerBuffer(1);
         NativeFileDialog.NFD_OpenDialog("nt", System.getProperty("user.home"), pointer);
+        long addr = pointer.get();
 
-        if (pointer.get() != 0) {
+        if (addr != 0) {
             noiseLayers.clear();
             XmlReader xml = new XmlReader();
-            XmlReader.Element main = xml.parse(Gdx.files.absolute(pointer.getStringUTF8()));
+            XmlReader.Element main = xml.parse(Gdx.files.absolute(MemoryUtil.memUTF8(addr)));
             seed.set(Integer.parseInt(main.getAttribute("seed")));
             resolution[0] = Integer.parseInt(main.getAttribute("resolution"));
             for (XmlReader.Element layer : main.getChildrenByName("layer")) {
@@ -193,6 +280,7 @@ public class NoiseScreen implements Screen {
                 noiseLayers.add(nl);
             }
         }
+        generate();
     }
 
     void copy() {
@@ -207,6 +295,12 @@ public class NoiseScreen implements Screen {
         ImageTransferable transferable = new ImageTransferable(image);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, null);
     }
+
+    boolean isFractal(NoiseLayer layer) {
+        return layer.noiseType == NoiseType.PerlinFractal || layer.noiseType == NoiseType.FoamFractal || layer.noiseType == NoiseType.CubicFractal || layer.noiseType == NoiseType.HoneyFractal || layer.noiseType == NoiseType.ValueFractal;
+    }
+
+    boolean showCode = false;
 
     @Override
     public void render(float delta) {
@@ -312,7 +406,7 @@ public class NoiseScreen implements Screen {
                 ImGui.inputFloat("Frequency", layer.frequency);
                 ImGui.inputFloat("Amplitude", layer.amplitude);
 
-                if (layer.noiseType == NoiseType.PerlinFractal || layer.noiseType == NoiseType.FoamFractal || layer.noiseType == NoiseType.CubicFractal || layer.noiseType == NoiseType.HoneyFractal || layer.noiseType == NoiseType.ValueFractal) {
+                if (isFractal(layer)) {
                     ImGui.inputFloat("Fractal Gain", layer.fractalGain);
                     ImGui.inputInt("Fractal Octaves", layer.fractalOctaves);
                 }
@@ -339,10 +433,22 @@ public class NoiseScreen implements Screen {
 
         if (ImGui.button("Generate"))
             generate();
+        ImGui.sameLine();
+        if (ImGui.button("Show Code"))
+            showCode = !showCode;
 
         ImGui.text("" + generationSpeed + "ms");
 
         ImGui.end();
+
+        if (showCode) {
+            ImGui.setNextWindowSizeConstraints(300,160,10000,10000);
+            ImGui.begin("Code");
+
+            textEditor.render("Code");
+
+            ImGui.end();
+        }
 
         ImGui.render();
         imGuiGl3.renderDrawData(ImGui.getDrawData());
