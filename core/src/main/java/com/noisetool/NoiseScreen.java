@@ -125,18 +125,18 @@ public class NoiseScreen implements Screen {
 
         StringBuilder code = new StringBuilder();
 
-        code.append("int seed = " + seed.get() + ";\n");
-        code.append("int size = " + resolution[0] + ";\n\n");
+        code.append("int seed = ").append(seed.get()).append(";\n");
+        code.append("int size = ").append(resolution[0]).append(";\n\n");
 
         int idx = 0;
         for (NoiseLayer layer : noiseLayers) {
             String name = "noise" + idx;
-            code.append("Noise " + name + " = new Noise();\n");
-            code.append(name + ".setSeed(seed);\n");
-            code.append(name + ".setFrequency(" + layer.frequency.get() + "f);\n");
+            code.append("Noise ").append(name).append(" = new Noise();\n");
+            code.append(name).append(".setSeed(seed);\n");
+            code.append(name).append(".setFrequency(").append(layer.frequency.get()).append("f);\n");
             if (isFractal(layer)) {
-                code.append(name + ".setFractalGain(" + layer.fractalGain.get() + "f);\n");
-                code.append(name + ".setFractalOctaves(" + layer.fractalOctaves.get() + ");\n");
+                code.append(name).append(".setFractalGain(").append(layer.fractalGain.get()).append("f);\n");
+                code.append(name).append(".setFractalOctaves(").append(layer.fractalOctaves.get()).append(");\n");
             }
             code.append("\n");
             idx++;
@@ -150,33 +150,33 @@ public class NoiseScreen implements Screen {
         for (NoiseLayer layer : noiseLayers) {
             String name = "noise" + idx;
             if (layer.noiseType == NoiseType.Perlin) {
-                code.append(name + ".getPerlin(i, j)");
+                code.append(name).append(".getPerlin(i, j)");
             } else if (layer.noiseType == NoiseType.PerlinFractal) {
-                code.append(name + ".getPerlinFractal(i, j)");
+                code.append(name).append(".getPerlinFractal(i, j)");
             } else if (layer.noiseType == NoiseType.Cubic) {
-                code.append(name + ".getCubic(i, j)");
+                code.append(name).append(".getCubic(i, j)");
             } else if (layer.noiseType == NoiseType.CubicFractal) {
-                code.append(name + ".getCubicFractal(i, j)");
+                code.append(name).append(".getCubicFractal(i, j)");
             } else if (layer.noiseType == NoiseType.Foam) {
-                code.append(name + ".getFoam(i, j)");
+                code.append(name).append(".getFoam(i, j)");
             } else if (layer.noiseType == NoiseType.FoamFractal) {
-                code.append(name + ".getFoamFractal(i, j)");
+                code.append(name).append(".getFoamFractal(i, j)");
             } else if (layer.noiseType == NoiseType.Honey) {
-                code.append(name + ".getHoney(i, j)");
+                code.append(name).append(".getHoney(i, j)");
             } else if (layer.noiseType == NoiseType.HoneyFractal) {
-                code.append(name + ".getHoneyFractal(i, j)");
+                code.append(name).append(".getHoneyFractal(i, j)");
             } else if (layer.noiseType == NoiseType.Cellular) {
-                code.append(name + ".getCellular(i, j)");
+                code.append(name).append(".getCellular(i, j)");
             } else if (layer.noiseType == NoiseType.Value) {
-                code.append(name + ".getValue(i, j)");
+                code.append(name).append(".getValue(i, j)");
             } else if (layer.noiseType == NoiseType.ValueFractal) {
-                code.append(name + ".getValueFractal(i, j)");
+                code.append(name).append(".getValueFractal(i, j)");
             } else if (layer.noiseType == NoiseType.Simplex) {
-                code.append(name + ".getSimplex(i, j)");
+                code.append(name).append(".getSimplex(i, j)");
             } else if (layer.noiseType == NoiseType.SimplexFractal) {
-                code.append(name + ".getSimplexFractal(i, j)");
+                code.append(name).append(".getSimplexFractal(i, j)");
             } else if (layer.noiseType == NoiseType.WhiteNoise) {
-                code.append(name + ".getWhiteNoise(i, j)");
+                code.append(name).append(".getWhiteNoise(i, j)");
             }
             if (idx < noiseLayers.size - 1) code.append(" + ");
             idx++;
