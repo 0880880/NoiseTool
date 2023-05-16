@@ -12,6 +12,7 @@ public class NoiseLayer {
     public ImFloat amplitude = new ImFloat(1);
     public ImFloat fractalGain = new ImFloat(1);
     public ImInt fractalOctaves = new ImInt(1);
+    public ImFloat fractalLacunarity = new ImFloat(2);
 
     public NoiseLayer(float frequency, float amplitude) {
         this.frequency.set(frequency);

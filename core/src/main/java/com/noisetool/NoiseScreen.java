@@ -79,24 +79,28 @@ public class NoiseScreen implements Screen {
                     } else if (layer.noiseType == NoiseType.PerlinFractal) {
                         generator.setFractalGain(layer.fractalGain.get());
                         generator.setFractalOctaves(layer.fractalOctaves.get());
+                        generator.setFractalLacunarity(layer.fractalLacunarity.get());
                         val = generator.getPerlinFractal(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.Cubic) {
                         val = generator.getCubic(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.CubicFractal) {
                         generator.setFractalGain(layer.fractalGain.get());
                         generator.setFractalOctaves(layer.fractalOctaves.get());
+                        generator.setFractalLacunarity(layer.fractalLacunarity.get());
                         val = generator.getCubicFractal(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.Foam) {
                         val = generator.getFoam(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.FoamFractal) {
                         generator.setFractalGain(layer.fractalGain.get());
                         generator.setFractalOctaves(layer.fractalOctaves.get());
+                        generator.setFractalLacunarity(layer.fractalLacunarity.get());
                         val = generator.getFoamFractal(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.Honey) {
                         val = generator.getHoney(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.HoneyFractal) {
                         generator.setFractalGain(layer.fractalGain.get());
                         generator.setFractalOctaves(layer.fractalOctaves.get());
+                        generator.setFractalLacunarity(layer.fractalLacunarity.get());
                         val = generator.getHoneyFractal(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.Cellular) {
                         val = generator.getCellular(i, j) * layer.amplitude.get();
@@ -105,12 +109,14 @@ public class NoiseScreen implements Screen {
                     } else if (layer.noiseType == NoiseType.ValueFractal) {
                         generator.setFractalGain(layer.fractalGain.get());
                         generator.setFractalOctaves(layer.fractalOctaves.get());
+                        generator.setFractalLacunarity(layer.fractalLacunarity.get());
                         val = generator.getValueFractal(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.Simplex) {
                         val = generator.getSimplex(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.SimplexFractal) {
                         generator.setFractalGain(layer.fractalGain.get());
                         generator.setFractalOctaves(layer.fractalOctaves.get());
+                        generator.setFractalLacunarity(layer.fractalLacunarity.get());
                         val = generator.getSimplexFractal(i, j) * layer.amplitude.get();
                     } else if (layer.noiseType == NoiseType.WhiteNoise) {
                         val = generator.getWhiteNoise(i, j) * layer.amplitude.get();
@@ -137,6 +143,7 @@ public class NoiseScreen implements Screen {
             if (isFractal(layer)) {
                 code.append(name).append(".setFractalGain(").append(layer.fractalGain.get()).append("f);\n");
                 code.append(name).append(".setFractalOctaves(").append(layer.fractalOctaves.get()).append(");\n");
+                code.append(name).append(".setFractalLacunarity(").append(layer.fractalLacunarity.get()).append(");\n");
             }
             code.append("\n");
             idx++;
@@ -246,6 +253,7 @@ public class NoiseScreen implements Screen {
                             .attribute("amplitude", layer.amplitude.get())
                             .attribute("fractalGain", layer.fractalGain.get())
                             .attribute("fractalOctaves", layer.fractalOctaves.get())
+                            .attribute("fractalLacunarity", layer.fractalLacunarity.get())
                             .pop();
                 }
                 xml.pop();
@@ -277,6 +285,7 @@ public class NoiseScreen implements Screen {
                 nl.amplitude.set(Float.parseFloat(layer.getAttribute("amplitude")));
                 nl.fractalGain.set(Float.parseFloat(layer.getAttribute("fractalGain")));
                 nl.fractalOctaves.set(Integer.parseInt(layer.getAttribute("fractalOctaves")));
+                nl.fractalOctaves.set(Integer.parseInt(layer.getAttribute("fractalLacunarity")));
                 noiseLayers.add(nl);
             }
         }
@@ -408,6 +417,7 @@ public class NoiseScreen implements Screen {
 
                 if (isFractal(layer)) {
                     ImGui.inputFloat("Fractal Gain", layer.fractalGain);
+                    ImGui.inputFloat("Fractal Lacunarity", layer.fractalLacunarity);
                     ImGui.inputInt("Fractal Octaves", layer.fractalOctaves);
                 }
 
