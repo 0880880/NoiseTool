@@ -29,8 +29,8 @@ configure(subprojects) {
 }
 
 subprojects {
-	version = '1.0.0'
-	ext.appName = 'MapGenerator'
+	version = '0.5.0'
+	ext.appName = 'NoiseTool'
 	repositories {
 		mavenCentral()
 		maven { url 'https://s01.oss.sonatype.org' }
