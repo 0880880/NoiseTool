@@ -1,0 +1,47 @@
+import org.gradle.internal.os.OperatingSystem
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+eclipse.project.name = appName + '-core'
+
+switch (org.gradle.internal.os.OperatingSystem.current()) {
+	case org.gradle.internal.os.OperatingSystem.LINUX:
+		def osArch = System.getProperty("os.arch")
+		project.ext.lwjglNatives = osArch.startsWith("arm") || osArch.startsWith("aarch64")
+				? "natives-linux-${osArch.contains("64") || osArch.startsWith("armv8") ? "arm64" : "arm32"}"
+				: "natives-linux"
+		break
+	case org.gradle.internal.os.OperatingSystem.MAC_OS:
+		project.ext.lwjglNatives = System.getProperty("os.arch").startsWith("aarch64") ? "natives-macos-arm64" : "natives-macos"
+		break
+	case org.gradle.internal.os.OperatingSystem.WINDOWS:
+		def osArch = System.getProperty("os.arch")
+		project.ext.lwjglNatives = osArch.contains("64")
+				? "natives-windows${osArch.startsWith("aarch64") ? "-arm64" : ""}"
+				: "natives-windows-x86"
+		break
+}
+
+dependencies {
+	api "com.badlogicgames.gdx:gdx:$gdxVersion"
+	api "com.github.tommyettinger:make_some_noise:$makeSomeNoiseVersion"
+	api "org.projectlombok:lombok:$lombokVersion"
+	api "space.earlygrey:shapedrawer:$shapeDrawerVersion"
+	annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+	implementation "org.lwjgl:lwjgl"
+	implementation "org.lwjgl:lwjgl-glfw"
+	implementation "org.lwjgl:lwjgl-opengl"
+	implementation "org.lwjgl:lwjgl-nfd"
+	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-nfd::$lwjglNatives"
+
+	implementation "io.github.spair:imgui-java-binding:$imguiVersion"
+	implementation "io.github.spair:imgui-java-lwjgl3:$imguiVersion"
+
+	implementation "io.github.spair:imgui-java-natives-windows:$imguiVersion"
+	implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+}
